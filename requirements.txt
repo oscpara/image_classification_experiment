@@ -1,0 +1,12 @@
+fastapi
+uvicorn[standard]
+python-multipart
+torch
+torchvision
+transformers
+pillow
+pytest
+sqlalchemy
+psycopg[binary]
+datasets
+tqdm

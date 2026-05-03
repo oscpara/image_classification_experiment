@@ -1,7 +1,11 @@
 *.env 
 *.log 
 *.ipynb
+*.py[cod]
+__pycache__/
+.pytest_cache/
 myvenv/
 data/
 context.md
 temp/
+storage/
