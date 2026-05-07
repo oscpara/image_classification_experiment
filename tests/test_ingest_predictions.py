@@ -4,7 +4,7 @@ import pytest
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import sessionmaker
 
-from src.ingest_predictions import Prediction, ingest_predictions
+from src.ingest_predictions import Prediction, _mask_database_url, ingest_predictions
 
 
 def _prediction_record(prediction_id: str = "prediction-1") -> dict[str, object]:
@@ -81,3 +81,11 @@ def test_ingest_predictions_rejects_missing_required_fields(tmp_path):
 
     with pytest.raises(ValueError, match="Line 1 is missing required fields"):
         ingest_predictions(source_path, _database_url(tmp_path))
+
+
+def test_mask_database_url_hides_password():
+    masked_url = _mask_database_url(
+        "postgresql+psycopg://myapp_user:secret@localhost:5432/myapp"
+    )
+
+    assert masked_url == "postgresql+psycopg://myapp_user:***@localhost:5432/myapp"
