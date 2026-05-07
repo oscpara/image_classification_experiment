@@ -14,6 +14,6 @@ def get_database_url() -> str | None:
     if database_url:
         return database_url
 
-    parser = configparser.ConfigParser()
+    parser = configparser.ConfigParser(interpolation=None)
     parser.read(CONFIG_PATH, encoding="utf-8-sig")
     return parser.get("database", "url", fallback=None)
