@@ -2,18 +2,22 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlsplit, urlunsplit
 
 from sqlalchemy import Float, Integer, String, Text, UniqueConstraint, create_engine, select
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
 
+try:
+    from src.config import get_database_url
+except ModuleNotFoundError:
+    from config import get_database_url
+
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_PREDICTIONS_LOG_PATH = PROJECT_ROOT / "storage" / "predictions" / "predictions.jsonl"
-DEFAULT_DATABASE_URL = os.environ.get("DATABASE_URL")
 
 
 class Base(DeclarativeBase):
@@ -177,10 +181,24 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--database-url",
-        default=DEFAULT_DATABASE_URL,
-        help="SQLAlchemy database URL. Defaults to DATABASE_URL.",
+        default=get_database_url(),
+        help="SQLAlchemy database URL. Defaults to DATABASE_URL, then config.ini.",
     )
     return parser.parse_args()
+
+
+def _mask_database_url(database_url: str) -> str:
+    """Hide credentials when reporting the target database."""
+
+    parts = urlsplit(database_url)
+    if not parts.password:
+        return database_url
+
+    hostname = parts.hostname or ""
+    port = f":{parts.port}" if parts.port else ""
+    username = parts.username or ""
+    netloc = f"{username}:***@{hostname}{port}"
+    return urlunsplit((parts.scheme, netloc, parts.path, parts.query, parts.fragment))
 
 
 def main() -> None:
@@ -188,10 +206,10 @@ def main() -> None:
 
     args = parse_args()
     if not args.database_url:
-        raise SystemExit("Set DATABASE_URL or pass --database-url.")
+        raise SystemExit("Set DATABASE_URL, set [database].url in config.ini, or pass --database-url.")
 
     ingested_count = ingest_predictions(args.source, args.database_url)
-    print(f"Ingested {ingested_count} new prediction rows into {args.database_url}")
+    print(f"Ingested {ingested_count} new prediction rows into {_mask_database_url(args.database_url)}")
 
 
 if __name__ == "__main__":

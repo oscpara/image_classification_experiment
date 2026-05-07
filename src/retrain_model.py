@@ -23,6 +23,11 @@ from torchvision.transforms import (
 from tqdm import tqdm
 from transformers import AutoImageProcessor, AutoModelForImageClassification
 
+try:
+    from src.config import get_database_url
+except ModuleNotFoundError:
+    from config import get_database_url
+
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = PROJECT_ROOT / "data" / "9Breeds"
@@ -36,7 +41,6 @@ CHECKPOINT_PATH = (
     / "best_model.pth"
 )
 MODEL_CHECKPOINT = "facebook/convnext-base-224"
-DATABASE_URL = os.environ.get("DATABASE_URL")
 TRAINING_SAMPLES_SQL = os.environ.get(
     "TRAINING_SAMPLES_SQL",
     "SELECT image_path, label FROM training_samples WHERE approved = true",
@@ -266,7 +270,11 @@ def parse_args() -> argparse.Namespace:
     """Parse retraining job settings."""
 
     parser = argparse.ArgumentParser(description="Retrain the dog breed classifier.")
-    parser.add_argument("--database-url", default=DATABASE_URL)
+    parser.add_argument(
+        "--database-url",
+        default=get_database_url(),
+        help="SQLAlchemy database URL. Defaults to DATABASE_URL, then config.ini.",
+    )
     parser.add_argument("--training-samples-sql", default=TRAINING_SAMPLES_SQL)
     return parser.parse_args()
 
@@ -276,7 +284,7 @@ def main() -> None:
 
     args = parse_args()
     if not args.database_url:
-        raise SystemExit("Set DATABASE_URL or pass --database-url.")
+        raise SystemExit("Set DATABASE_URL, set [database].url in config.ini, or pass --database-url.")
 
     seed_everything()
     samples = load_training_samples(args.database_url, args.training_samples_sql)
