@@ -16,22 +16,18 @@ from PIL import Image, UnidentifiedImageError
 from torchvision.transforms import CenterCrop, Compose, Normalize, Resize, ToTensor
 from transformers import AutoImageProcessor, AutoModelForImageClassification
 
-
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-DATA_DIR = PROJECT_ROOT / "data" / "9Breeds"
-STORAGE_DIR = PROJECT_ROOT / "storage"
-RAW_UPLOADS_DIR = STORAGE_DIR / "raw_uploads"
-PREDICTIONS_DIR = STORAGE_DIR / "predictions"
-PREDICTIONS_LOG_PATH = PREDICTIONS_DIR / "predictions.jsonl"
-CHECKPOINT_PATH = (
-    PROJECT_ROOT
-    / "temp"
-    / "models"
-    / "convnext-dogs-classification"
-    / "checkpoints"
-    / "best_model.pth"
+from src.paths import (
+    CHECKPOINT_PATH,
+    DATA_DIR,
+    IMAGE_SUFFIXES,
+    MODEL_CHECKPOINT,
+    PREDICTIONS_DIR,
+    PREDICTIONS_LOG_PATH,
+    PROJECT_ROOT,
+    RAW_UPLOADS_DIR,
+    STORAGE_DIR,
 )
-MODEL_CHECKPOINT = "facebook/convnext-base-224"
+
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 
@@ -42,7 +38,7 @@ def _safe_file_suffix(filename: str | None) -> str:
     """Return a known image suffix so saved uploads have predictable names."""
 
     suffix = Path(filename or "").suffix.lower()
-    if suffix in {".jpg", ".jpeg", ".png", ".webp", ".bmp"}:
+    if suffix in IMAGE_SUFFIXES:
         return suffix
     return ".jpg"
 
