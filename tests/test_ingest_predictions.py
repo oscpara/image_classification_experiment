@@ -4,7 +4,7 @@ import pytest
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import sessionmaker
 
-from src.ingest_predictions import Prediction, _mask_database_url, ingest_predictions
+from src.predictions.ingest import Prediction, _mask_database_url, ingest_predictions
 
 
 def _prediction_record(prediction_id: str = "prediction-1") -> dict[str, object]:
