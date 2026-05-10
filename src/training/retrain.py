@@ -46,6 +46,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--metrics-output", type=Path, default=RETRAINING_METRICS_PATH)
     parser.add_argument("--max-epochs", type=int, default=MAX_EPOCHS)
     parser.add_argument(
+        "--promote-predictions",
+        action="store_true",
+        help="Opt in to copying prediction-log images into training data before retraining.",
+    )
+    parser.add_argument(
         "--database-url",
         default=get_database_url(),
         help="SQLAlchemy database URL for approved training samples.",
@@ -61,15 +66,15 @@ def main() -> None:
 
     seed_everything()
     promoted_count = 0
-    if args.predictions_log.exists():
+    if args.promote_predictions:
+        if not args.predictions_log.exists():
+            raise FileNotFoundError(f"Predictions log not found: {args.predictions_log}")
         promoted_count = promote_predictions_to_training_data(
             predictions_log_path=args.predictions_log,
             training_data_dir=args.training_data_dir,
             manifest_path=args.promotion_manifest,
         )
         print(f"Promoted {promoted_count} new prediction images")
-    else:
-        print(f"No predictions log found at {args.predictions_log}; skipping prediction promotion")
 
     training_data_dir = args.training_data_dir
     if args.database_url:

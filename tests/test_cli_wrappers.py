@@ -30,3 +30,4 @@ def test_retrain_wrapper_supports_direct_execution_and_legacy_database_flags():
     assert result.returncode == 0, result.stderr
     assert "--database-url" in result.stdout
     assert "--training-samples-sql" in result.stdout
+    assert "--promote-predictions" in result.stdout
