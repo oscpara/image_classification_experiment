@@ -1,5 +1,11 @@
 from __future__ import annotations
 
+import sys
+from pathlib import Path
+
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
 from src.paths import (
     CHECKPOINT_PATH,
     CHALLENGER_CHECKPOINT_PATH,
@@ -9,6 +15,7 @@ from src.paths import (
     PROJECT_ROOT,
     RETRAINING_DATA_DIR,
     RETRAINING_METRICS_PATH,
+    RETRAINING_SOURCE_DATA_DIR,
 )
 from src.predictions.promote import (
     DEFAULT_PREDICTIONS_LOG_PATH,
@@ -61,6 +68,7 @@ __all__ = [
     "PROJECT_ROOT",
     "RETRAINING_DATA_DIR",
     "RETRAINING_METRICS_PATH",
+    "RETRAINING_SOURCE_DATA_DIR",
     "SEED",
     "TrainingSample",
     "_build_dataloaders",
